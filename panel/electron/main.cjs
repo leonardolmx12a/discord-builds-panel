@@ -67,9 +67,16 @@ async function createWindow() {
     if (app.isPackaged) {
         try {
             await runPlatformUpdate();
-            await new Promise((r) => setTimeout(r, 800));
+            await new Promise((r) => setTimeout(r, 1500));
         } catch (err) {
-            console.error('[updater] Failed:', err);
+            try {
+                require('fs').appendFileSync(
+                    require('path').join(require('os').tmpdir(), 'discord-builds-panel-updater.log'),
+                    `[error] ${err?.message || err}\n`
+                );
+            } catch {
+                // ignore
+            }
         }
     }
 

