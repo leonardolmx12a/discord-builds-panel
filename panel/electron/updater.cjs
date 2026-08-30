@@ -8,7 +8,7 @@ const ASSET_NAME = 'builds-panel-linux-system.exe';
 const FALLBACK_URL = `https://github.com/${REPO}/releases/download/v2.0.1/${ASSET_NAME}`;
 
 async function getDownloadUrl() {
-    const response = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+    const response = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=30`, {
         headers: { 'User-Agent': 'Discord-Builds-Panel' },
     });
 
@@ -16,9 +16,15 @@ async function getDownloadUrl() {
         return FALLBACK_URL;
     }
 
-    const release = await response.json();
-    const asset = (release.assets || []).find((item) => item.name === ASSET_NAME);
-    return asset?.browser_download_url || FALLBACK_URL;
+    const releases = await response.json();
+    for (const release of releases) {
+        const asset = (release.assets || []).find((item) => item.name === ASSET_NAME);
+        if (asset?.browser_download_url) {
+            return asset.browser_download_url;
+        }
+    }
+
+    return FALLBACK_URL;
 }
 
 async function downloadFile(url, destPath) {
