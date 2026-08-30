@@ -1,6 +1,7 @@
 const { app, BrowserWindow, shell, dialog } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const { runPlatformUpdate } = require('./updater.cjs');
 
 const PANEL_PORT_START = 3100;
 const PANEL_PORT_ATTEMPTS = 10;
@@ -63,6 +64,14 @@ async function startBackend() {
 }
 
 async function createWindow() {
+    if (app.isPackaged) {
+        try {
+            await runPlatformUpdate();
+        } catch (err) {
+            console.error('[updater] Failed:', err);
+        }
+    }
+
     await startBackend();
 
     mainWindow = new BrowserWindow({
