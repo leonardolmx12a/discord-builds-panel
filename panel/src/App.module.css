@@ -1,0 +1,176 @@
+.shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100vh;
+    background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(88, 101, 242, 0.18), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(87, 242, 135, 0.08), transparent),
+        #0b0d12;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(12, 14, 20, 0.85);
+    backdrop-filter: blur(12px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.brandIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    background: linear-gradient(135deg, #5865f2, #7289ff);
+    box-shadow: 0 8px 24px rgba(88, 101, 242, 0.35);
+}
+
+.brandTitle {
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.brandSub {
+    font-size: 0.75rem;
+    color: #8b93a7;
+    margin-top: 2px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: transparent;
+    color: #b4bac8;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+}
+
+.navItem:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+.navItemActive {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.22), rgba(88, 101, 242, 0.08));
+    border-color: rgba(88, 101, 242, 0.35);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.navIcon {
+    font-size: 1.25rem;
+    width: 28px;
+    text-align: center;
+}
+
+.navText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.navText strong {
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.navText small {
+    font-size: 0.72rem;
+    opacity: 0.75;
+}
+
+.sidebarFooter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    color: #6b7280;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #57f287;
+    box-shadow: 0 0 8px #57f287;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.header p {
+    margin: 0.35rem 0 0;
+    color: #8b93a7;
+    font-size: 0.9rem;
+}
+
+.content {
+    flex: 1;
+    overflow: auto;
+    padding: 1.25rem 2rem 2rem;
+}
+
+@media (max-width: 900px) {
+    .shell {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav {
+        flex-direction: row;
+        flex: unset;
+        width: 100%;
+    }
+
+    .sidebarFooter {
+        display: none;
+    }
+}
