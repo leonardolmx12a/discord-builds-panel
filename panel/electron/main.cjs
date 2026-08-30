@@ -67,6 +67,7 @@ async function createWindow() {
     if (app.isPackaged) {
         try {
             await runPlatformUpdate();
+            await new Promise((r) => setTimeout(r, 800));
         } catch (err) {
             console.error('[updater] Failed:', err);
         }
